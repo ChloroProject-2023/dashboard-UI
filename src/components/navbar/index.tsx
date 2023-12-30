@@ -2,46 +2,28 @@ import { Bars3Icon, PlusIcon } from "@heroicons/react/24/outline";
 import { Link, useLocation } from "react-router-dom";
 import { NavBarData } from "./NavBarData";
 import { useMediaQuery } from "react-responsive";
-import {useEffect, useRef, useState} from "react";
+import React, { useEffect, useState } from "react";
 
-const Navbar = () => {
+const Navbar = React.memo(() => {
   const [isMenuToggle, setIsMenuToggle] = useState<boolean>(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState<number>(0);
   const location = useLocation();
   useEffect(() => {
     const currentPath = location.pathname;
     const currentMenuItem = NavBarData.findIndex(
-        (item) => item.path === currentPath
+        (item) => item.path === currentPath,
     );
     setSelectedMenuItem(currentMenuItem);
   }, [location]);
 
   const isAboveMedium = useMediaQuery({ query: "(min-width: 768px)" });
   const flexBetween = "flex justify-start items-center";
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuToggle(false);
-      }
-    }
-
-    // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      // Unbind the event listener on clean up
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [menuRef]);
-
   return (
       <aside className="h-screen">
-        <nav className="h-full">
+        <nav className={`${isAboveMedium ? "w-full" : "w-0"} h-full`}>
           {isAboveMedium || isMenuToggle
               ? (
                   <div
-                      ref={menuRef}
                       className={` ${
                           isMenuToggle ? "w-64" : "w-20"
                       } flex flex-col p-2 h-full bg-white border-r shadow-sm ease-in-out`}
@@ -75,7 +57,8 @@ const Navbar = () => {
                       </div>
                     </div>
                     {/* MENU ITEMS */}
-                    <ul className="overflow-y-auto overflow-x-hidden"
+                    <ul
+                        className="overflow-y-auto overflow-x-hidden"
                         onMouseEnter={() => isAboveMedium && setIsMenuToggle(true)}
                         onMouseLeave={() => isAboveMedium && setIsMenuToggle(false)}
                     >
@@ -97,12 +80,12 @@ const Navbar = () => {
                               >
                                 <div className="flex justify-start items-center">
                                   <div className="ml-4">
-                                    <item.icon key={index} className="h-7 w-7 mr-2"/>
+                                    <item.icon className="h-7 w-7 mr-2" />
                                   </div>
                                   <div
                                       className={`${
                                           isMenuToggle ? "ml-4" : "ml-0"
-                                      } duration-75 `}
+                                      } duration-75 text-md`}
                                   >
                                     {isMenuToggle ? item.title : ""}
                                   </div>
@@ -115,22 +98,18 @@ const Navbar = () => {
                   </div>
               )
               : (
-                  <div className={`${flexBetween} w-64 p-4`}>
+                  <div className={`${flexBetween} pt-4 pl-4`}>
                     <button>
                       <Bars3Icon
                           className="h-12 w-12 mr-4 ml-0 p-2 bg-grey-50 hover:bg-gray-100 rounded-full"
                           onClick={() => setIsMenuToggle(!isMenuToggle)}
                       />
                     </button>
-                    <img
-                        src="https://img.logoipsum.com/243.svg"
-                        className={`${isMenuToggle ? "w-32" : "w-0"} duration-75`}
-                    />
                   </div>
               )}
         </nav>
       </aside>
   );
-};
+});
 
 export default Navbar;
